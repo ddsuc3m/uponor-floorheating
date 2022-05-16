@@ -1,0 +1,77 @@
+# Configuration
+
+# MODBUS_TCP_ADDRESS: address of the serial server
+# MODBUS_TCP_PORT: port of the serial server
+# MAX_MEAN_TIMES_TIMEOUT if the current wating period after frames is MAX_MEAN_TIMES_TIMEOUT times the waiting period mean
+# it means there is a timeout and TCP connection should be restablished
+
+serialServerConfig:
+  MODBUS_TCP_ADDRESS: "192.168.1.XXX"
+  MODBUS_TCP_PORT: XXX
+  MAX_MEAN_TIMES_TIMEOUT: 6
+  
+# SYSTEM_FIRST_BYTE and SYSTEM_SECOND_BYTE are the first two bytes of the system (that is not station id and function,
+# but other things...) in my case, frames start with 0x11 0x04 - Decimal 17 04
+# this two bytes are the header, so   SYSTEM_HEADER_LEN is usually 2.
+# The addresses of the stations (thermostats) are 2 bytes long  ADDRESS_LEN
+# The data is sent from the stations as ID + PAYLOAD (so 3 bytes long) COMMANDDATA_LEN
+# The modbus CRC is two bytes long CRC_LEN
+# COOLING_SETPOINT_OFFSET: in my system, when cooling, the temperature shown in the thermostat screen is two celsius degrees
+# more than the reported by the bus, so when settng the setpoint in celsisus it is necessary to decrease the temperature by
+# COOLING_SETPOINT_OFFSET before sending the data to the bus!
+# HEATING_SETPOINT_OFFSET, the same for heating (in my case there is no such offset for heating)
+
+systemConfig:
+  SYSTEM_FIRST_BYTE: 17
+  SYSTEM_SECOND_BYTE: 4
+  SYSTEM_HEADER_LEN: 2
+  ADDRESS_LEN: 2
+  COMMANDDATA_LEN: 3
+  CRC_LEN: 2
+  COOLING_SETPOINT_OFFSET: 2.00
+  HEATING_SETPOINT_OFFSET: 0.00
+
+# BUS_MIN_WATING_ITERATIONS_AFTER_SEND: How many waiting periods should wait before sending the next change. Remember
+#  we are tapping the bus so any frame we send is unexpected. In order to prevent problems, we may wait 5 iterations
+#  to avoid problems with the controller (perhaps this value can be set to 1, but I prefer to wait 5 iterations)
+# BUS_PING_OFFSET: the offset in the frame in which we can find the function in this strange "modbus" protocol
+# BUS_PING_FUNCTION: 0xFF function for ping (does not exist in real modbus... but not here)
+# BUS_TIMEWINDOW_VALIDITY_ITERATIONS_MAX: iterations after we invalidate time window mean (for sending) and 
+# recalculate times again to include variations in the network
+# FRAME_MIN_LEN: minimum frame length (usually the ping sent by the controller to the thermostats)
+# FRAME_MAX_LEN: maximum frame (usually the second frame sent by the thermostat is 30, but feel comfortable to set it to 50) 
+# FRAME_PROCESSING_MIN_LEN: how much information should be present in the buffer before processing frames (to avoid problems)
+ 
+busConfig:
+  BUS_MIN_WATING_ITERATIONS_AFTER_SEND: 5
+  BUS_PING_OFFSET: 4
+  BUS_PING_FUNCTION: 0xFF
+  BUS_TIMEWINDOW_VALIDITY_ITERATIONS_MAX: 400
+  FRAME_MIN_LEN: 7
+  FRAME_MAX_LEN: 50 
+  FRAME_PROCESSING_MIN_LEN: 51 
+  
+# The topic for publish will be FloorHeating/ThermostatFriendlyName/
+# The topic for subscription will be FloorHeating/ThermostatFriendlyName/Setpoint/Set where you should write a string 23.00 for instance!
+mqttConfig:
+  publisherId: "f8fa0aea-ca67-4c65-a9c3-6f412eadf7a8"
+  broker: "tcp://192.168.1.ZZZ:1883"
+  password_authentication: true
+  username: "username"
+  password: "password"
+  publishTopicPrefix: "FloorHeating"
+  subscribeSetPointChildTopic: "Setpoint/Set"
+    
+# Please, provide fiendlynames with no spaces
+# If you don't know the names, just let the program run, observe MQTT server and change temperatures
+# in your thermostats to find out. Thermostats when unknown, are given the friendlyname UnknownXXXX where XXXX is the hexStringID
+thermostatsFriendlyNamesConfig:
+  - friendlyName: "Kitchen"
+    hexStringID: "ABCD"
+  - friendlyName: "Attic"
+    hexStringID: "CDAF"
+  - friendlyName: "Room1"
+    hexStringID: "ABDC"  
+   
+
+

@@ -1,0 +1,20 @@
+[Unit]
+Description=Modbusparser uponor
+After=syslog.target network.target
+
+[Service]
+# from https://www.baeldung.com/linux/run-java-application-as-service
+# The JVM designers made Java return a non-zero exit code in case it is terminated by a system signal.
+# As a non-zero base, they took 128, and the resulting exit code is a sum of 128 and the signal numeric value.
+# By setting SuccessExitStatus to 143, we tell systemd to handle that value (128+15) as a normal exit.
+SuccessExitStatus=143
+User=root
+Group=root
+
+Type=simple
+
+ExecStart=bash /opt/modbusparser/run.sh
+ExecStop=/bin/kill -15 $MAINPID
+
+[Install]
+WantedBy=multi-user.target

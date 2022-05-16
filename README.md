@@ -11,14 +11,14 @@ The use of this hardware and software requires interacting with devices that are
 
 Be cautious and disconnect any device from the mains before going on.
 
-** Whenever a circuit is manipulated and something goes wrong, you may brick your system making it unusable ** If you go on, it will be on you own responsibility. 
+**Whenever a circuit is manipulated and something goes wrong, you may brick your system making it unusable** If you go on, it will be on you own responsibility. 
 
 **So, we take NO RESPONSABILITY AT ALL for any personal or device damage.** 
 
 
 ## Disclaimer (IPR)
 
-This project has been carried out as an academic and/or recreational project and shared as-is. If there is any kind of IPR regarding the bus, hardware, devices, or any piece of software you think it usage in this documentation of software is infringing any copyright, registered utility model or any other kind of protection, let us know and we will remove the code and the information as soon as possible.
+This project has been carried out as an academic and/or recreational project and shared as-is. If there is any kind of IPR regarding the bus, hardware, devices, or any piece of software you think its usage in this documentation or software is infringing any copyright, registered utility model or any other kind of protection, let us know and we will remove the code and the information as soon as possible.
 
 ## Disclaimer (code quality)
 
@@ -38,7 +38,7 @@ Uponor FloorHeating (and cooling) systems require a controller that uses a Modbu
 
 I guess the protocol would be the same (or quite similar) even for wireless thermostats (probably with less updates to save battery), but I could only test this with wired ones. 
 
-Concretely, using the smatrix base unit (X.145) and T-146 thermostats.
+It has been tested using the smatrix base unit (X.145) and T-146 thermostats.
 
 
 According to the document entitled “Uponor Smatrix Base PRO Controller X-147 Modbus RTU interface” (that can be easily found on the internet), PRO models (as X-147) can be connected to a BMS (as Openhab using modbus binding) and controlled according to the information on the document (very easy, and the way to go if you are lucky and have a PRO model).
@@ -143,7 +143,7 @@ SuccessExitStatus=143
 User=root
 Group=root
 
-Type=forking
+Type=simple
 
 ExecStart=bash /opt/modbusparser/run.sh
 ExecStop=/bin/kill -15 $MAINPID
@@ -189,5 +189,5 @@ You can also play with the system and change the setpoint:
 
 ### OpenHAB integration
 
-Coming soon (but using MQTT.. you are on your own!)
+Coming soon (but using MQTT... you are on your own!)
 

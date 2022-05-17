@@ -229,14 +229,12 @@ public class TCPClient implements Runnable {
 					} else {
 						bus.timeUpdateAfterReceive(incoming, bytes_read);
 					}
-					writeToBus();
-					try {
-						TimeUnit.MILLISECONDS.sleep(10);
-					} catch (InterruptedException e) {
-						logger.log(Level.INFO, "Could not wait 10 seconds after reading again");
-						//ConnectSocketAndStartThreads(socketThread);
-					}
-
+				}
+				writeToBus();
+				try {
+					TimeUnit.MILLISECONDS.sleep(10);
+				} catch (InterruptedException e) {
+					logger.log(Level.INFO, "Could not wait 10 miliseconds after reading again");
 				}
 
 			} catch (IOException | NotYetConnectedException e) {

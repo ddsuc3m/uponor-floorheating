@@ -42,7 +42,6 @@ public class MQTTClient implements MqttCallback {
 	}
 
 	private void connect() {
-		//while (true) {
 			try {
 				if (publisher == null) {
 
@@ -60,16 +59,7 @@ public class MQTTClient implements MqttCallback {
 					publisher.connect(options);
 					publisher.setCallback(this);
 
-				} /*else {
-					if(!publisher.isConnected()) 
-					{
-						publisher.reconnect();
-					}
-					/*}else
-					{
-						break;
-					}*/
-				//}
+				} 
 			} catch (MqttException e) {
 				try {
 					e.printStackTrace();
@@ -78,11 +68,7 @@ public class MQTTClient implements MqttCallback {
 					ie.printStackTrace();
 				}
 			}
-			/*if (publisher.isConnected())
-				return;
-			*/
-		//}
-
+			
 	}
 
 	public void updateEntity(Entity ec) {
@@ -122,7 +108,7 @@ public class MQTTClient implements MqttCallback {
 	public void connectionLost(Throwable cause) {
 
 		cause.printStackTrace();
-		//connect();
+
 	}
 
 	@Override

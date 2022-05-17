@@ -62,8 +62,8 @@ public class TCPClient implements Runnable {
 		mqttClient = new MQTTClient(this);
 		hostAddress = new InetSocketAddress(serialServerConfig.getMODBUS_TCP_ADDRESS(),
 				serialServerConfig.getMODBUS_TCP_PORT());
-		ConnectSocketAndStartThread(null);
-		startProcessorThread();
+		ConnectSocketAndStartThreads(null);
+		
 
 	}
 
@@ -72,10 +72,14 @@ public class TCPClient implements Runnable {
 		processThread.start();
 	}
 
-	public void ConnectSocketAndStartThread(Thread oldThread) {
+	public void ConnectSocketAndStartThreads(Thread oldThread) {
 		bus.resetTimeCalculationsAndSendClearance();
 		if (oldThread != null) {
 			oldThread.interrupt();
+		}
+		if(processThread != null)
+		{
+			processThread.interrupt();
 		}
 		incoming.clear();
 		if (client != null) {
@@ -90,6 +94,7 @@ public class TCPClient implements Runnable {
 		if (client.isConnected()) {
 			socketThread = new Thread(this);
 			socketThread.start();
+			startProcessorThread();
 		}
 
 	}
@@ -141,7 +146,7 @@ public class TCPClient implements Runnable {
 								"-----------------------------------------------------------------------------------------------------------------------------------------------------");
 						logger.log(Level.FINE, "Writing " + HexString.convertToHexadecimal(bufferToWrite));
 					} catch (IOException e) {
-						ConnectSocketAndStartThread(socketThread);
+						ConnectSocketAndStartThreads(socketThread);
 					}
 				}
 				removeFrameToWrite(frameTowrite);
@@ -187,7 +192,7 @@ public class TCPClient implements Runnable {
 								* bus.getWriteTimeMillisMean()))) {
 							logger.log(Level.FINE, "Reading data " + bytes_read + " " + client.isConnected() + " "
 									+ bus.getWriteTimeMillis() + " " + bus.getWriteTimeMillisMean());
-							ConnectSocketAndStartThread(socketThread);
+							ConnectSocketAndStartThreads(socketThread);
 						} else {
 							bus.timeUpdateWaitingForFrame(incoming);
 						}
@@ -198,14 +203,14 @@ public class TCPClient implements Runnable {
 					try {
 						TimeUnit.MILLISECONDS.sleep(10);
 					} catch (InterruptedException e) {
-						ConnectSocketAndStartThread(socketThread);
+						ConnectSocketAndStartThreads(socketThread);
 					}
 
 				}
 
 			} catch (IOException | NotYetConnectedException e) {
 				logger.log(Level.SEVERE, "Socket IOException or not Connected, reconnecting...");
-				ConnectSocketAndStartThread(socketThread);
+				ConnectSocketAndStartThreads(socketThread);
 			}
 
 		}

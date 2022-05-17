@@ -120,7 +120,7 @@ public class MQTTClient implements MqttCallback {
 	public void connectionLost(Throwable cause) {
 
 		cause.printStackTrace();
-		connect();
+		//connect();
 	}
 
 	@Override

@@ -40,6 +40,7 @@ public class TCPClient implements Runnable {
 	private ConfigFromFile configFile;
 	private Configuration config;
 	private SerialServerConfig serialServerConfig;
+	private boolean inspect = false;
 
 	private Logger logger;
 	{
@@ -50,7 +51,7 @@ public class TCPClient implements Runnable {
 	protected ByteBuffer incoming;
 	private FrameProcessor frameProcessor;
 
-	public TCPClient(String configurationFilePath) throws FileNotFoundException {
+	public TCPClient(String configurationFilePath, boolean inspect) throws FileNotFoundException {
 
 		configFile = new ConfigFromFile(configurationFilePath);
 		config = configFile.getConfiguration();
@@ -58,18 +59,17 @@ public class TCPClient implements Runnable {
 		ec = new EntityCollection(config);
 		bus = new Bus(config);
 		incoming = ByteBuffer.allocate(4096);
-		
+		this.inspect = inspect;
+
 		mqttClient = new MQTTClient(this);
 		hostAddress = new InetSocketAddress(serialServerConfig.getMODBUS_TCP_ADDRESS(),
 				serialServerConfig.getMODBUS_TCP_PORT());
 		ConnectSocketAndStartThreads(null);
-		
 
 	}
 
 	public void startProcessorThread() {
-		if (frameProcessor != null)
-		{
+		if (frameProcessor != null) {
 			frameProcessor.kill();
 			processThread.interrupt();
 		}
@@ -83,7 +83,7 @@ public class TCPClient implements Runnable {
 		if (oldThread != null) {
 			oldThread.interrupt();
 		}
-		
+
 		incoming.clear();
 		if (client != null) {
 			try {
@@ -118,7 +118,7 @@ public class TCPClient implements Runnable {
 				try {
 					TimeUnit.SECONDS.sleep(5);
 				} catch (InterruptedException ie) {
-					logger.log(Level.WARNING,"Could not wait to reconnect " + ie.getMessage());
+					logger.log(Level.WARNING, "Could not wait to reconnect " + ie.getMessage());
 				}
 			}
 		}
@@ -126,8 +126,20 @@ public class TCPClient implements Runnable {
 
 	public void processFramesToEntities(List<Frame> frames) {
 		for (Frame f : frames) {
+			
 			Entity e = ec.frameBroker(f);
-			mqttClient.updateEntity(e);
+			if(inspect)
+			{
+				System.out.println(f.toString());
+				System.out.println(e.getStatusString());
+			}
+			try {
+				mqttClient.updateEntity(e);
+			} catch (Exception ex) {
+				logger.log(Level.WARNING,
+						"Mqtt Client may have been interrupted. If after a TCP reconection do not worry! "
+								+ ex.getMessage());
+			}
 		}
 
 	}
@@ -175,8 +187,6 @@ public class TCPClient implements Runnable {
 		return framesToWrite.peek();
 	}
 
-	
-	
 	@Override
 	public void run() {
 		int bytes_read = 0;
@@ -191,8 +201,9 @@ public class TCPClient implements Runnable {
 					bytes_read = client.read(incoming);
 					if (bytes_read <= 0) {
 
-						if (bus.getTimersReady() && (bus.getWriteTimeMillis() > (serialServerConfig.getMAX_MEAN_TIMES_TIMEOUT()
-								* bus.getWriteTimeMillisMean()))) {
+						if (bus.getTimersReady()
+								&& (bus.getWriteTimeMillis() > (serialServerConfig.getMAX_MEAN_TIMES_TIMEOUT()
+										* bus.getWriteTimeMillisMean()))) {
 							logger.log(Level.FINE, "Reading data " + bytes_read + " " + client.isConnected() + " "
 									+ bus.getWriteTimeMillis() + " " + bus.getWriteTimeMillisMean());
 							ConnectSocketAndStartThreads(socketThread);
@@ -223,43 +234,44 @@ public class TCPClient implements Runnable {
 		return config;
 	}
 
-	
 	public @Nullable EntityCollection getEntityCollection() {
 		return ec;
 	}
 
+	public static void printUsage() {
+		System.out.println("Usage: Normal case");
+		System.out.println("Usage: TCPClient configurationFilePath");
+		System.out.println("Usage: Testing and figuring out thermostats addresses");
+		System.out.println("Usage: TCPClient configurationFilePath inspect");
+	}
 
 	public static void main(String args[]) {
 
 		if (args.length == 0) {
-			System.out.println("Usage: TCPClient configurationFilePath");
+			printUsage();
 			System.exit(1); // Non zero termination
 		}
-		String configurationFilePath = args[0];
-		try {
-			TCPClient tcpc = new TCPClient(configurationFilePath);
-
-			CommanDataFrame cdf = new CommanDataFrame(tcpc.config);
-			SetPointTemperature sp0 = new SetPointTemperature();
-			sp0.setPayloadZero();
-			cdf.addCommandData(sp0);
-			SetPointTemperature spT = new SetPointTemperature();
-			spT.setCelsius(20.00f);
-			cdf.addCommandData(spT);
-			// cdf.setAddress((byte) 0x9E, (byte) 0x8B);
-			cdf.setAddress((byte) 0x70, (byte) 0x64);
-
-			cdf.generateRawFrame();
-			// System.out.println(cdf.toString());
-			try {
-				TimeUnit.SECONDS.sleep(40);
-			} catch (InterruptedException ie) {
-				// Interrupted.
+		String configurationFilePath = "";
+		String debug = "";
+		boolean inspect = false;
+		if (args.length >= 1)
+			configurationFilePath = args[0];
+		if (args.length == 2) {
+			debug = args[1];
+			if (!debug.equalsIgnoreCase("inspect")) {
+				printUsage();
+				System.exit(1);
+			} else {
+				inspect = true;
 			}
-			// tcpc.addFrameToWrite(cdf);
+		}
+		try {
+			TCPClient tcpc = new TCPClient(configurationFilePath, inspect);
+
 		} catch (FileNotFoundException e) {
 			System.out.println("Could not find the configuration file ");
-			e.printStackTrace();
+			printUsage();
+			System.exit(1);
 		}
 
 	}

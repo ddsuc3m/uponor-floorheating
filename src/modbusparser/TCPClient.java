@@ -278,7 +278,7 @@ public class TCPClient implements Runnable {
 			configurationFilePath = args[0];
 		if (args.length == 2) {
 			mod = args[1];
-			if (!mod.equalsIgnoreCase("inspect") || !mod.equalsIgnoreCase("status") ) {
+			if (!mod.equalsIgnoreCase("inspect") && !mod.equalsIgnoreCase("status") ) {
 				printUsage();
 				System.exit(1);
 			} else if (mod.equalsIgnoreCase("inspect")) {

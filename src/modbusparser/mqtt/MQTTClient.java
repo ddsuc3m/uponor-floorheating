@@ -61,14 +61,20 @@ public class MQTTClient implements MqttCallback {
 					publisher.setCallback(this);
 
 				} else {
-					publisher.reconnect();
+					if(!publisher.isConnected()) 
+					{
+						publisher.reconnect();
+					}else
+					{
+						break;
+					}
 				}
 			} catch (MqttException e) {
 				try {
 					e.printStackTrace();
 					TimeUnit.SECONDS.sleep(5);
 				} catch (InterruptedException ie) {
-
+					ie.printStackTrace();
 				}
 			}
 			if (publisher.isConnected())
@@ -90,7 +96,7 @@ public class MQTTClient implements MqttCallback {
 			try {
 				publisher.subscribe(ec.getSubscribeTopic(), 0);
 			} catch (MqttException e) {
-				//ignore...
+				e.printStackTrace();
 			}
 		}
 		String publish = ec.getJSON();

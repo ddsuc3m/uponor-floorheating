@@ -39,11 +39,11 @@ public class FrameProcessor implements Runnable {
 	public void run() {
 		while (true) {
 			ByteBuffer check = null;
-			if(killThread)
-				break;
 			synchronized (Locks.bufferLock) {
 				check = incoming.duplicate();
 			}
+			if(killThread)
+				break;
 			Logger.getLogger(FrameParser.class.getName()).log(Level.FINEST,
 					"check POS (PRE-FLIP):" + check.position() + " LIM:" + check.limit() + " REM:" + check.remaining());
 			check.flip();

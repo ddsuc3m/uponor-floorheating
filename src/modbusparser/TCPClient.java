@@ -79,11 +79,20 @@ public class TCPClient implements Runnable {
 	}
 
 	public void ConnectSocketAndStartThreads(Thread oldThread) {
+		logger.log(Level.INFO,"Connecting or reconnecting");
 		bus.resetTimeCalculationsAndSendClearance();
 		if (oldThread != null) {
+			if (frameProcessor != null) {
+				logger.log(Level.INFO,"Interrupt old process thread");
+				frameProcessor.kill();
+				processThread.interrupt();
+			}
+			logger.log(Level.INFO,"Interrupt old TCP thread");
 			oldThread.interrupt();
+			
+			
 		}
-
+		logger.log(Level.INFO,"Clear incoming buffer");
 		incoming.clear();
 		if (client != null) {
 			try {
@@ -95,6 +104,7 @@ public class TCPClient implements Runnable {
 		}
 		ConnectSocket();
 		if (client.isConnected()) {
+			logger.log(Level.INFO,"Create and start new threads");
 			socketThread = new Thread(this);
 			socketThread.start();
 			startProcessorThread();

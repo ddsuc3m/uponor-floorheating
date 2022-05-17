@@ -37,13 +37,22 @@ public class FrameProcessor implements Runnable {
 
 	@Override
 	public void run() {
+		Logger.getLogger(FrameParser.class.getName()).log(Level.WARNING, "Frame Process thread " + Thread.currentThread().getId() + " starting to process frames");
 		while (true) {
 			ByteBuffer check = null;
 			synchronized (Locks.bufferLock) {
 				check = incoming.duplicate();
 			}
+			/* if the thread has been waiting and 
+			 * it has been requested to end, 
+			 * this should be checked as it will be interrupted by 
+			 * the main TCP thread. 
+			 */
 			if(killThread)
+			{
+				Logger.getLogger(FrameParser.class.getName()).log(Level.WARNING, "Frame Process thread " + Thread.currentThread().getId() + " killed");
 				break;
+			}
 			Logger.getLogger(FrameParser.class.getName()).log(Level.FINEST,
 					"check POS (PRE-FLIP):" + check.position() + " LIM:" + check.limit() + " REM:" + check.remaining());
 			check.flip();

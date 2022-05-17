@@ -69,10 +69,6 @@ public class TCPClient implements Runnable {
 	}
 
 	public void startProcessorThread() {
-		if (frameProcessor != null) {
-			frameProcessor.kill();
-			processThread.interrupt();
-		}
 		frameProcessor = new FrameProcessor(incoming, Locks.bufferLock, this);
 		processThread = new Thread(this.frameProcessor);
 		processThread.start();
@@ -83,12 +79,13 @@ public class TCPClient implements Runnable {
 		bus.resetTimeCalculationsAndSendClearance();
 		if (oldThread != null) {
 			if (frameProcessor != null) {
-				logger.log(Level.INFO,"Interrupt old process thread");
+				logger.log(Level.INFO,"Let the old frame processing thread know it should die");
 				frameProcessor.kill();
+				logger.log(Level.INFO,"Then interrupt frame processing thread");
 				processThread.interrupt();
 			}
-			logger.log(Level.INFO,"Interrupt old TCP thread");
-			oldThread.interrupt();
+			//logger.log(Level.INFO,"Interrupt old TCP thread just in case it is waiti");
+			//oldThread.interrupt();
 			
 			
 		}
@@ -201,6 +198,7 @@ public class TCPClient implements Runnable {
 	public void run() {
 		int bytes_read = 0;
 		bus.setPreviousTime(System.currentTimeMillis());
+		logger.log(Level.INFO,"Thread " + Thread.currentThread().getId() + " running...");
 		while (true) {
 
 			bytes_read = 0;
@@ -217,6 +215,8 @@ public class TCPClient implements Runnable {
 							logger.log(Level.FINE, "Reading data " + bytes_read + " " + client.isConnected() + " "
 									+ bus.getWriteTimeMillis() + " " + bus.getWriteTimeMillisMean());
 							ConnectSocketAndStartThreads(socketThread);
+							logger.log(Level.INFO, "Thread " + Thread.currentThread().getId() + " exiting");
+							break;
 						} else {
 							bus.timeUpdateWaitingForFrame(incoming);
 						}
@@ -227,7 +227,8 @@ public class TCPClient implements Runnable {
 					try {
 						TimeUnit.MILLISECONDS.sleep(10);
 					} catch (InterruptedException e) {
-						ConnectSocketAndStartThreads(socketThread);
+						logger.log(Level.INFO, "Could not wait 10 seconds after reading again");
+						//ConnectSocketAndStartThreads(socketThread);
 					}
 
 				}
@@ -235,6 +236,8 @@ public class TCPClient implements Runnable {
 			} catch (IOException | NotYetConnectedException e) {
 				logger.log(Level.SEVERE, "Socket IOException or not Connected, reconnecting...");
 				ConnectSocketAndStartThreads(socketThread);
+				logger.log(Level.INFO, "Thread " + Thread.currentThread().getId() + " exiting");
+				break;
 			}
 
 		}

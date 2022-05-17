@@ -116,7 +116,7 @@ JAVA_OPTIONS=" -Xms256m -Xmx512m -server -cp $CLASSPATH"
 APP_OPTIONS=" /opt/modbusparser/config.yaml"
 
 cd $WORKDIR
-"${JAVA_HOME}/bin/java" $JAVA_OPTIONS $CLASSNAME $APP_OPTIONS
+"${JAVA_HOME}/bin/java" $JAVA_OPTIONS $CLASSNAME $APP_OPTIONS $1
 
 ```
 
@@ -126,7 +126,10 @@ Give execution permissions to the script:
 chmod u+x /opt/modbusparser/run.sh
 ```
 
-Test the application by running `bash run.sh`. And if everything goes fine, kill the application and create a service.
+**Inspect mode**
+
+Test the application by running `bash /opt/modbusparser/run.sh inspect` so you can see the traffic. And if everything goes fine, find out the identity of every thermostat and update fiendlynames accordingly. Then kill the application and create a service.
+
 The service script provided is `modbusparser.service`. You may need to change it if installed the application to other place. Otherwise (for `/opt/modbusparser`) it looks like the following:
 
 ```
@@ -172,6 +175,30 @@ If everything goes fine, install it!
 sudo systemctl enable  modbusparser
 ```
 
+### Update
+
+Just go to the folder in which you cloned the project and run:
+
+```
+systemctl stop modbusparser
+git pull
+```
+
+Then recompile and move the new jar file:
+
+```
+mvn install
+cp target/modbusparser-0.0.1-SNAPSHOT.jar /opt/modbusparser/.
+
+```
+
+
+Then run (as root):
+
+```
+systemctl start modbusparser
+```
+
 ## MQTT and OpenHAB
 
 ### MQTT 
@@ -180,7 +207,7 @@ Once the service is running, you can connect to your MQTT broker and see what is
 
 <img src="img/mqtt_read.png" />
 
-You can use MQTT tools to find out (by changing the setpoint and having a look to the Room Temperature) which ID corresponds to a given thermostat and give a friendly name to it in the `config.yaml` file.
+You can use MQTT tools to find out (by changing the setpoint and having a look to the Room Temperature) which ID corresponds to a given thermostat and give a friendly name to it in the `config.yaml` file. Otherwise use the inspect mode as described before.
 
 You can also play with the system and change the setpoint:
 

@@ -8,4 +8,4 @@ JAVA_OPTIONS=" -Xms256m -Xmx512m -server -cp $CLASSPATH"
 APP_OPTIONS=" /opt/modbusparser/config.yaml"
 
 cd $WORKDIR
-"${JAVA_HOME}/bin/java" $JAVA_OPTIONS $CLASSNAME $APP_OPTIONS
+"${JAVA_HOME}/bin/java" $JAVA_OPTIONS $CLASSNAME $APP_OPTIONS $1

@@ -128,7 +128,14 @@ chmod u+x /opt/modbusparser/run.sh
 
 **Inspect mode**
 
-Test the application by running `bash /opt/modbusparser/run.sh inspect` so you can see the traffic. And if everything goes fine, find out the identity of every thermostat and update fiendlynames accordingly. Then kill the application and create a service.
+Test the application by running `bash /opt/modbusparser/run.sh inspect` so you can see the traffic. Find out the identity of every thermostat and update fiendlynames accordingly. 
+
+**Status mode**
+
+Test the application by running `bash /opt/modbusparser/run.sh status` so you can see the thermostats anf their data as they are disconvered. Find out the identity of every thermostat and update fiendlynames accordingly.
+
+**Service**
+And if everything goes fine, Then kill the application and create a service.
 
 The service script provided is `modbusparser.service`. You may need to change it if installed the application to other place. Otherwise (for `/opt/modbusparser`) it looks like the following:
 

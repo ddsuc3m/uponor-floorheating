@@ -50,8 +50,9 @@ public class TCPClient implements Runnable {
 	}
 	protected ByteBuffer incoming;
 	private FrameProcessor frameProcessor;
+	private boolean status;
 
-	public TCPClient(String configurationFilePath, boolean inspect) throws FileNotFoundException {
+	public TCPClient(String configurationFilePath, boolean inspect, boolean status) throws FileNotFoundException {
 
 		configFile = new ConfigFromFile(configurationFilePath);
 		config = configFile.getConfiguration();
@@ -60,6 +61,7 @@ public class TCPClient implements Runnable {
 		bus = new Bus(config);
 		incoming = ByteBuffer.allocate(4096);
 		this.inspect = inspect;
+		this.status = status;
 
 		mqttClient = new MQTTClient(this);
 		hostAddress = new InetSocketAddress(serialServerConfig.getMODBUS_TCP_ADDRESS(),
@@ -139,6 +141,10 @@ public class TCPClient implements Runnable {
 			{
 				System.out.println(f.toString());
 				System.out.println(e.getStatusString());
+			}
+			if(status)
+			{
+				System.out.println(ec.getStatusString());
 			}
 			try {
 				mqttClient.updateEntity(e);
@@ -265,21 +271,24 @@ public class TCPClient implements Runnable {
 			System.exit(1); // Non zero termination
 		}
 		String configurationFilePath = "";
-		String debug = "";
+		String mod = "";
 		boolean inspect = false;
+		boolean status = false;
 		if (args.length >= 1)
 			configurationFilePath = args[0];
 		if (args.length == 2) {
-			debug = args[1];
-			if (!debug.equalsIgnoreCase("inspect")) {
+			mod = args[1];
+			if (!mod.equalsIgnoreCase("inspect") || !mod.equalsIgnoreCase("status") ) {
 				printUsage();
 				System.exit(1);
-			} else {
+			} else if (mod.equalsIgnoreCase("inspect")) {
 				inspect = true;
+			} else {
+				status = true;
 			}
 		}
 		try {
-			TCPClient tcpc = new TCPClient(configurationFilePath, inspect);
+			TCPClient tcpc = new TCPClient(configurationFilePath, inspect, status);
 
 		} catch (FileNotFoundException e) {
 			System.out.println("Could not find the configuration file ");

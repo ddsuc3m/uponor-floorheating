@@ -41,18 +41,17 @@ public class FrameProcessor implements Runnable {
 		while (true) {
 			ByteBuffer check = null;
 			synchronized (Locks.bufferLock) {
+				/* if the frame processing thread has been waiting and it has been requested to end, 
+				 * this should be checked as it will be interrupted by the main TCP thread. 
+				 */
+				if(killThread)
+				{
+					Logger.getLogger(FrameParser.class.getName()).log(Level.WARNING, "Frame Process thread " + Thread.currentThread().getId() + " killed");
+					break;
+				}
 				check = incoming.duplicate();
 			}
-			/* if the thread has been waiting and 
-			 * it has been requested to end, 
-			 * this should be checked as it will be interrupted by 
-			 * the main TCP thread. 
-			 */
-			if(killThread)
-			{
-				Logger.getLogger(FrameParser.class.getName()).log(Level.WARNING, "Frame Process thread " + Thread.currentThread().getId() + " killed");
-				break;
-			}
+			
 			Logger.getLogger(FrameParser.class.getName()).log(Level.FINEST,
 					"check POS (PRE-FLIP):" + check.position() + " LIM:" + check.limit() + " REM:" + check.remaining());
 			check.flip();
@@ -81,6 +80,32 @@ public class FrameProcessor implements Runnable {
 			if (check.hasRemaining() && incoming.remaining() > busConfig.getFRAME_PROCESSING_MIN_LEN()) {
 
 				List<Frame> latest_frames = fp.getConsistenData(incoming, bufferWaitObject, busConfig);
+				
+				synchronized (bufferWaitObject) {
+					/* if the frame processing thread has been waiting and it has been requested to end, 
+					 * this should be checked as it will be interrupted by the main TCP thread. 
+					 */
+					if(killThread)
+					{
+						Logger.getLogger(FrameParser.class.getName()).log(Level.WARNING, "Frame Process thread " + Thread.currentThread().getId() + " killed");
+						break;
+					}
+					incoming.flip();
+					logger.log(Level.FINEST,
+							"Incoming possition set to " + fp.getUpdatedIncomingPointer() + " and then compacting, so we processed "
+									+ (fp.getUpdatedIncomingPointer()) + " bytes");
+					logger.log(Level.FINEST, "Incoming (PRE-POSUPDATE) POS:"
+							+ incoming.position() + " LIM:" + incoming.limit() + " REM:" + incoming.remaining());
+					incoming.position(fp.getUpdatedIncomingPointer());
+					fp.clearUpdatedIncomingPointer();
+					logger.log(Level.FINEST, "Incoming (POST-POSUPDATE-PRECOMPACT) POS:"
+							+ incoming.position() + " LIM:" + incoming.limit() + " REM:" + incoming.remaining());
+					incoming.compact();
+					logger.log(Level.FINEST, "Incoming (POSTCOMPACT) POS:"
+							+ incoming.position() + " LIM:" + incoming.limit() + " REM:" + incoming.remaining());
+					
+
+				}
 
 				if (latest_frames != null) {
 					tcpClient.processFramesToEntities(latest_frames);

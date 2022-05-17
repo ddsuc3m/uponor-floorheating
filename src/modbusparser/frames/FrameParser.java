@@ -20,6 +20,7 @@ public class FrameParser {
 	private Configuration configuration;
 	private SystemConfig systemConfig;
 	private Logger logger;
+	private int updatedIncomingPointer = 0;
 	{
 		logger = Logger.getLogger(FrameParser.class.getName());
 	}
@@ -42,6 +43,16 @@ public class FrameParser {
 		this.systemConfig = configuration.getSystemConfig();
 		
 	}
+	
+	public int getUpdatedIncomingPointer() {
+		return updatedIncomingPointer;
+	}
+
+	public void clearUpdatedIncomingPointer() {
+		this.updatedIncomingPointer = 0;
+	}
+
+
 
 	public boolean checkPreamble(ByteBuffer data, int start) {
 		if (data.get(start) == ((byte) systemConfig.getSYSTEM_FIRST_BYTE())
@@ -195,7 +206,7 @@ public class FrameParser {
 						frames = new ArrayList<>();
 					}
 					frames.add(currentFrame);
-					updatedIncomingPossition = FRAME_NEXT;
+					this.updatedIncomingPointer = FRAME_NEXT;
 					// incoming.position(FRAME_NEXT);
 					FRAME_FOUND = false;
 					FRAME_TYPE_FOUND = false;
@@ -216,22 +227,7 @@ public class FrameParser {
 			logger.log(Level.FINE, "Frames processed 0");
 		}
 		// this is the only place in which we touch the buffer:
-		synchronized (bufferWaitObject) {
-			incoming.flip();
-			logger.log(Level.FINEST,
-					"Incoming possition set to " + updatedIncomingPossition + " and then compacting, so we processed "
-							+ (updatedIncomingPossition) + " bytes");
-			logger.log(Level.FINEST, "Incoming (PRE-POSUPDATE) POS:"
-					+ incoming.position() + " LIM:" + incoming.limit() + " REM:" + incoming.remaining());
-			incoming.position(updatedIncomingPossition);
-			logger.log(Level.FINEST, "Incoming (POST-POSUPDATE-PRECOMPACT) POS:"
-					+ incoming.position() + " LIM:" + incoming.limit() + " REM:" + incoming.remaining());
-			incoming.compact();
-			logger.log(Level.FINEST, "Incoming (POSTCOMPACT) POS:"
-					+ incoming.position() + " LIM:" + incoming.limit() + " REM:" + incoming.remaining());
-			
 
-		}
 
 		return frames;
 	}

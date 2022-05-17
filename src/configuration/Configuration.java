@@ -36,6 +36,7 @@ public class Configuration {
 
 	public String lookupFriendlyName(EntityID id) {
 
+		if(thermostatsFriendlyNamesConfig!=null)
 		for (ThermostatsFriendlyNameConfigItem fni : thermostatsFriendlyNamesConfig) {
 			if (id.getIDStr().equalsIgnoreCase(fni.hexStringID))
 				return fni.friendlyName;

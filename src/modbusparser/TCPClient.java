@@ -58,7 +58,7 @@ public class TCPClient implements Runnable {
 		ec = new EntityCollection(config);
 		bus = new Bus(config);
 		incoming = ByteBuffer.allocate(4096);
-		frameProcessor = new FrameProcessor(incoming, Locks.bufferLock, this);
+		
 		mqttClient = new MQTTClient(this);
 		hostAddress = new InetSocketAddress(serialServerConfig.getMODBUS_TCP_ADDRESS(),
 				serialServerConfig.getMODBUS_TCP_PORT());
@@ -68,6 +68,12 @@ public class TCPClient implements Runnable {
 	}
 
 	public void startProcessorThread() {
+		if (frameProcessor != null)
+		{
+			frameProcessor.kill();
+			processThread.interrupt();
+		}
+		frameProcessor = new FrameProcessor(incoming, Locks.bufferLock, this);
 		processThread = new Thread(this.frameProcessor);
 		processThread.start();
 	}
@@ -77,10 +83,7 @@ public class TCPClient implements Runnable {
 		if (oldThread != null) {
 			oldThread.interrupt();
 		}
-		if(processThread != null)
-		{
-			processThread.interrupt();
-		}
+		
 		incoming.clear();
 		if (client != null) {
 			try {
@@ -115,7 +118,7 @@ public class TCPClient implements Runnable {
 				try {
 					TimeUnit.SECONDS.sleep(5);
 				} catch (InterruptedException ie) {
-					// Interrupted.
+					logger.log(Level.WARNING,"Could not wait to reconnect " + ie.getMessage());
 				}
 			}
 		}

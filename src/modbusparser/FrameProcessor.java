@@ -19,6 +19,7 @@ public class FrameProcessor implements Runnable {
 	private Configuration configuration;
 	private BusConfig busConfig;
 	private FrameParser fp;
+	private boolean killThread = false;
 
 	public FrameProcessor(ByteBuffer incoming, Object bufferWaitObject, TCPClient tcpClient) {
 		this.incoming = incoming;
@@ -38,6 +39,8 @@ public class FrameProcessor implements Runnable {
 	public void run() {
 		while (true) {
 			ByteBuffer check = null;
+			if(killThread)
+				break;
 			synchronized (Locks.bufferLock) {
 				check = incoming.duplicate();
 			}
@@ -77,6 +80,11 @@ public class FrameProcessor implements Runnable {
 			}
 		}
 
+	}
+
+	public void kill() {
+		killThread = true;
+		
 	}
 
 }

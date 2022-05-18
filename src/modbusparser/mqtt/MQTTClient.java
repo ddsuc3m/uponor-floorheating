@@ -85,6 +85,7 @@ public class MQTTClient implements MqttCallback {
 				publisher.subscribe(ec.getSubscribeTopic(), 0);
 			} catch (MqttException e) {
 				e.printStackTrace();
+				return;
 			}
 		}
 		String publish = ec.getJSON();

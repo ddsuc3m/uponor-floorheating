@@ -135,6 +135,9 @@ public class MQTTClient implements MqttCallback {
 		}
 		if (targetEntity != null) {
 			float setPoint = targetEntity.getCelsiusWithoutOffset(temperatureWithOffset);
+			java.util.logging.Logger.getLogger(this.getClass().getName()).log(Level.INFO,
+					"Updating entity " + targetEntity.getFriendlyname() + "[" + targetEntity.getID().getIDStr() + "]" + " topic " + topic + " with value (Real) " + temperatureWithOffset + " bus value " + setPoint);
+			
 			// build frame
 			CommanDataFrame cdf = new CommanDataFrame(config);
 			SetPointTemperature sp0 = new SetPointTemperature();

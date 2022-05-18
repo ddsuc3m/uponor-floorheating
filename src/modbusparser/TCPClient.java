@@ -170,9 +170,9 @@ public class TCPClient implements Runnable {
 						bufferToWrite.flip();
 						written += client.write(bufferToWrite);
 
-						logger.log(Level.FINE,
+						logger.log(Level.INFO,
 								"-----------------------------------------------------------------------------------------------------------------------------------------------------");
-						logger.log(Level.FINE, "Writing " + HexString.convertToHexadecimal(bufferToWrite));
+						logger.log(Level.INFO, "Writing " + HexString.convertToHexadecimal(bufferToWrite));
 					} catch (IOException e) {
 						ConnectSocketAndStartThreads(socketThread);
 					}

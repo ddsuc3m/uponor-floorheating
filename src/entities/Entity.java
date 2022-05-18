@@ -148,7 +148,7 @@ public class Entity {
 			if(cooling)
 				this.setPointTemperatureWithOffset =  sp.getCelsius() + systemConfig.getCOOLING_SETPOINT_OFFSET();
 			else
-				this.setPointTemperatureWithOffset =  sp.getCelsius();
+				this.setPointTemperatureWithOffset =  sp.getCelsius() + systemConfig.getHEATING_SETPOINT_OFFSET();
 		}
 		if(cd.dataId == CommandDataTypeCollection.SETPOINT_TEMPERATURE_MAX.getDataId())
 		{
@@ -163,12 +163,20 @@ public class Entity {
 
 	}
 	
-	public float getCelsiusWithoutOffset(float celsiusWithOffset)
+	public float getCelsiusWithOffset(float celsiusWithOutOffset)
 	{
+		if(cooling)
+			return celsiusWithOutOffset + systemConfig.getCOOLING_SETPOINT_OFFSET();
+		else
+			return celsiusWithOutOffset + systemConfig.getHEATING_SETPOINT_OFFSET();
+	}
+	
+	public float getCelsiusWithoutOffset(float celsiusWithOffset)
+	{ 
 		if(cooling)
 			return celsiusWithOffset - systemConfig.getCOOLING_SETPOINT_OFFSET();
 		else
-			return celsiusWithOffset;
+			return celsiusWithOffset - systemConfig.getHEATING_SETPOINT_OFFSET();
 	}
 
 	public void updateLastRequested() {

@@ -162,6 +162,7 @@ public class TCPClient implements Runnable {
 			CommanDataFrame frameTowrite = getFrameToWrite();
 
 			if (bus.canWrite()) {
+				bus.resetSendClearance();
 				ByteBuffer bufferToWrite = frameTowrite.getRawFrame();
 				int written = 0;
 				int pendingToWrite = bufferToWrite.limit();
@@ -178,6 +179,7 @@ public class TCPClient implements Runnable {
 					}
 				}
 				removeFrameToWrite(frameTowrite);
+				
 			}
 		}
 

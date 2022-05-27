@@ -149,4 +149,9 @@ public class Bus {
 	public boolean getTimersReady() {
 		return (iterations > 10);
 	}
+
+	public void resetSendClearance() {
+		backoff = busConfig.getBUS_MIN_WATING_ITERATIONS_AFTER_SEND();
+		
+	}
 }

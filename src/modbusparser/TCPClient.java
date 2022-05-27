@@ -181,9 +181,6 @@ public class TCPClient implements Runnable {
 				}
 				removeFrameToWrite(frameTowrite);
 				
-			}else
-			{
-				logger.info("Cannot  | rounds remaining " + bus.getPendingRounds() );
 			}
 		}
 

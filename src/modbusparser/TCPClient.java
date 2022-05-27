@@ -172,14 +172,18 @@ public class TCPClient implements Runnable {
 						written += client.write(bufferToWrite);
 
 						logger.log(Level.INFO,
-								"-----------------------------------------------------------------------------------------------------------------------------------------------------");
+								"--------- Start Write --- to " + frameTowrite.address1 + frameTowrite.address2);
 						logger.log(Level.INFO, "Writing " + HexString.convertToHexadecimal(bufferToWrite));
-					} catch (IOException e) {
+						logger.log(Level.INFO,
+								"--------- End Write --- to " + frameTowrite.address1 + frameTowrite.address2);					} catch (IOException e) {
 						ConnectSocketAndStartThreads(socketThread);
 					}
 				}
 				removeFrameToWrite(frameTowrite);
 				
+			}else
+			{
+				logger.info("Cannot  | rounds remaining " + bus.getPendingRounds() );
 			}
 		}
 
